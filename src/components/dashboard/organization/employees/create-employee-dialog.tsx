@@ -32,7 +32,6 @@ import {
   type CreateEmployeeSchema,
 } from "@/lib/dashboard/organization/employees/validations";
 import { Input } from "@/components/ui/input";
-import { CalendarDatePicker } from "@/components/ui/calendar-date-picker";
 import {
   Select,
   SelectContent,

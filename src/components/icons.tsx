@@ -13,6 +13,7 @@ import {
   ShoppingCart,
   ListOrdered,
   ListCollapse,
+  ArrowRight,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
@@ -20,6 +21,7 @@ export type Icon = LucideIcon;
 export const Icons = {
   home: Home,
   history: ListCollapse,
+  arrowRight: ArrowRight,
   shoppingCart: ShoppingBag,
   sales: ShoppingCart,
   newSale: Plus,

@@ -31,7 +31,6 @@ import {
 import { updateEmployee } from "@/lib/dashboard/organization/employees/queries";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { CalendarDatePicker } from "@/components/ui/calendar-date-picker";
 import { Select } from "@radix-ui/react-select";
 import {
   SelectContent,
@@ -97,7 +96,7 @@ export function UpdateEmployeeSheet({
       <SheetContent className="flex flex-col gap-6 sm:max-w-md">
         <SheetHeader className="text-left">
           <SheetTitle>Actualizar Empleado</SheetTitle>
-          <SheetDescription>Actualice los datos del empleado.</SheetDescription>
+          <SheetDescription>Actualice los datos del empleado: {empleado.apellidos}, {empleado.nombres}</SheetDescription>
         </SheetHeader>
         <Form {...form}>
           <form

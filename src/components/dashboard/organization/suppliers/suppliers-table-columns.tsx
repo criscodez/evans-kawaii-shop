@@ -74,7 +74,7 @@ export function getColumns(): ColumnDef<Proveedor>[] {
       accessorKey: "nombre",
       enableHiding: false,
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Cliente" />
+        <DataTableColumnHeader column={column} title="Proveedor" />
       ),
       cell: ({ row }) => {
         return (

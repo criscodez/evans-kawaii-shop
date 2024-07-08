@@ -82,7 +82,9 @@ export function DataTableMultiFilter<TData>({
               options={options}
               setSelectedOptions={setSelectedOptions}
               operator={operator}
-              setOperator={setOperator}
+              setOperator={setOperator as React.Dispatch<React.SetStateAction<
+                DataTableConfig["logicalOperators"][number] | undefined
+              >>}
             />
           ))}
         </div>
