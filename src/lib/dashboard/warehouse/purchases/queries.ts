@@ -6,6 +6,7 @@ import type { CreatePurchaseSchema, GetPurchasesSchema } from "./validations";
 import { OrdenCompra } from "@/types";
 import { getErrorMessage } from "@/lib/handle-error";
 import { customAlphabet } from "nanoid";
+import { EstadoInventario } from "@prisma/client";
 
 export async function getPurchases(input: GetPurchasesSchema) {
   noStore();
@@ -112,6 +113,8 @@ export async function createPurchase(input: CreatePurchaseSchema) {
         return;
       }
 
+      const stock = productoDB.stockTotal - producto.cantidad;
+
       await db.producto.update({
         where: {
           id: producto.productoId,
@@ -119,7 +122,8 @@ export async function createPurchase(input: CreatePurchaseSchema) {
         data: {
           stockTotal: {
             increment: producto.cantidad,
-          }
+          },
+          estado: stock === productoDB.stockMinimo ? EstadoInventario.LIMITADO : stock > 0 ? EstadoInventario.EN_STOCK : EstadoInventario.AGOTADO,
         },
       });
 
@@ -135,6 +139,8 @@ export async function createPurchase(input: CreatePurchaseSchema) {
         },
       });
     });
+
+    revalidatePath("/")
 
     return {
       data: ordenCompra,
