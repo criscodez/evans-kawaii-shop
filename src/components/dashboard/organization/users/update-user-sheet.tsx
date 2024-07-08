@@ -2,21 +2,10 @@
 
 import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusIcon, ReloadIcon } from "@radix-ui/react-icons";
+import { ReloadIcon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -25,62 +14,70 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
-import { createUser } from "@/lib/dashboard/organization/users/queries";
 import {
-  createUserSchema,
-  type CreateUserSchema,
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+  import { Checkbox } from "@/components/ui/checkbox";
+import { User } from "@/types";
+import {
+  type UpdateUserSchema,
+  updateUserSchema,
 } from "@/lib/dashboard/organization/users/validations";
+import { updateUser } from "@/lib/dashboard/organization/users/queries";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { Empleado } from "@/types";
-import { getEmployeesList } from "@/lib/dashboard/organization/employees/queries";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 
 const rolesList = [
-  {
-    id: "ADMIN",
-    label: "Admin",
-  },
-  {
-    id: "GERENTE",
-    label: "Gerente",
-  },
-  {
-    id: "EMPLEADO_DE_VENTAS",
-    label: "Empleado de ventas",
-  },
-  {
-    id: "EMPLEADO_DE_INVENTARIO",
-    label: "Empleado de inventario",
-  },
-] as const;
+    {
+      id: "ADMIN",
+      label: "Admin",
+    },
+    {
+      id: "GERENTE",
+      label: "Gerente",
+    },
+    {
+      id: "EMPLEADO_DE_VENTAS",
+      label: "Empleado de ventas",
+    },
+    {
+      id: "EMPLEADO_DE_INVENTARIO",
+      label: "Empleado de inventario",
+    },
+  ] as const;
 
-export function CreateUserDialog() {
-  const [open, setOpen] = React.useState(false);
-  const [empleados, setEmpleados] = React.useState<Empleado[]>([]);
-  const [isCreatePending, startCreateTransition] = React.useTransition();
+interface UpdateUserSheetProps
+  extends React.ComponentPropsWithRef<typeof Sheet> {
+  usuario: User;
+}
 
-  React.useEffect(() => {
-    getEmployeesList().then((data) => {
-      setEmpleados(data.data as Empleado[]);
-    });
-  }, []);
+export function UpdateUserSheet({
+  usuario,
+  ...props
+}: UpdateUserSheetProps) {
+  const [isUpdatePending, startUpdateTransition] = React.useTransition();
 
-  const form = useForm<CreateUserSchema>({
-    resolver: zodResolver(createUserSchema),
+  const form = useForm<UpdateUserSchema>({
+    resolver: zodResolver(updateUserSchema),
+    defaultValues: {
+      username: usuario.username,
+      empleadoId: usuario.empleado.id,
+      roles: usuario.roles.map((role) => role.role),
+    },
   });
 
-  function onSubmit(input: CreateUserSchema) {
-    startCreateTransition(async () => {
-      const { error, data } = await createUser(input);
+  function onSubmit(input: UpdateUserSchema) {
+    startUpdateTransition(async () => {
+      const { error, data } = await updateUser({
+        id: usuario.id,
+        ...input,
+      });
 
       if (error) {
         toast.error(error);
@@ -88,28 +85,20 @@ export function CreateUserDialog() {
       }
 
       form.reset();
-      setOpen(false);
+      props.onOpenChange?.(false);
       toast.success(
-        "Usuario " + data?.username + " con id " + data?.id + " creado"
+        "Usuario " + data?.username + " con id " + data?.id + " actualizado"
       );
     });
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="default" size="sm">
-          <PlusIcon className="mr-2 size-4" aria-hidden="true" />
-          Nuevo usuario
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Crear Usuario</DialogTitle>
-          <DialogDescription>
-            Complete los detalles a continuación para crear un nuevo usuario.
-          </DialogDescription>
-        </DialogHeader>
+    <Sheet {...props}>
+      <SheetContent className="flex flex-col gap-6 sm:max-w-md">
+        <SheetHeader className="text-left">
+          <SheetTitle>Actualizar Usuario</SheetTitle>
+          <SheetDescription>Actualice los datos de usuario del empleado: {usuario.empleado.apellidos}, {usuario.empleado.nombres}</SheetDescription>
+        </SheetHeader>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -124,36 +113,6 @@ export function CreateUserDialog() {
                   <FormControl>
                     <Input placeholder="Username sin espacios..." {...field} />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="empleadoId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Empleado</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    disabled={empleados.length === 0}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccione un empleado" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectGroup>
-                        {empleados.map((item) => (
-                          <SelectItem key={item.id} value={item.id}>
-                            {item.nombres} {item.apellidos}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -224,25 +183,25 @@ export function CreateUserDialog() {
                 </FormItem>
               )}
             />
-            <DialogFooter className="gap-2 pt-2 sm:space-x-0">
-              <DialogClose asChild>
+            <SheetFooter className="gap-2 pt-2 sm:space-x-0">
+              <SheetClose asChild>
                 <Button type="button" variant="outline">
                   Cancelar
                 </Button>
-              </DialogClose>
-              <Button disabled={isCreatePending}>
-                {isCreatePending && (
+              </SheetClose>
+              <Button disabled={isUpdatePending}>
+                {isUpdatePending && (
                   <ReloadIcon
                     className="mr-2 size-4 animate-spin"
                     aria-hidden="true"
                   />
                 )}
-                Crear
+                Guardar
               </Button>
-            </DialogFooter>
+            </SheetFooter>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

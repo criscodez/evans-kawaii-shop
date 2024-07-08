@@ -12,12 +12,14 @@ import {
   ShoppingBag,
   ShoppingCart,
   ListOrdered,
+  ListCollapse,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
 
 export const Icons = {
   home: Home,
+  history: ListCollapse,
   shoppingCart: ShoppingBag,
   sales: ShoppingCart,
   newSale: Plus,

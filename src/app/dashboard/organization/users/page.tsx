@@ -1,60 +1,46 @@
-"use client";
+import { DashboardBreadCrumb } from "@/components/breadcrumb";
+import { UsersTable } from "@/components/dashboard/organization/users/users-table";
+import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
+import { Heading } from "@/components/ui/heading";
+import { Separator } from "@/components/ui/separator";
+import { getUsers } from "@/lib/dashboard/organization/users/queries";
+import { searchParamsSchema } from "@/lib/dashboard/organization/users/validations";
+import { SearchParams } from "@/types";
+import React from "react";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { toast } from "sonner";
+const breadcrumbItems = [
+  { title: "Organización", link: "/dashboard/organization" },
+  { title: "Usuarios", link: "/dashboard/organization/users" },
+];
 
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { CalendarDatePicker } from "@/components/ui/calendar-date-picker";
-import { CreateUserDialog } from "@/components/dashboard/organization/users/create-user-dialog";
+export default function UsersPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const search = searchParamsSchema.parse(searchParams);
 
-const FormSchema = z.object({
-  calendar: z.object({
-    from: z.date(),
-    to: z.date(),
-  }),
-  datePicker: z.object({
-    from: z.date(),
-    to: z.date(),
-  }),
-});
-
-export default function Home() {
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      calendar: {
-        from: new Date(new Date().getFullYear(), 0, 1),
-        to: new Date(),
-      },
-      datePicker: {
-        from: new Date(),
-        to: new Date(),
-      },
-    },
-  });
-
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    toast(
-      `1. Date range: ${data.calendar.from.toDateString()} - ${data.calendar.to.toDateString()}
-      \n2. Single date: ${data.datePicker.from.toDateString()}`
-    );
-  };
+  const usersPromise = getUsers(search);
 
   return (
-    <main className="flex min-h-screen:calc(100vh - 4rem) flex-col items-center justify-start">
-      <CreateUserDialog />
-    </main>
+    <div className="flex-1 space-y-4  p-4 pt-6 md:p-8">
+      <DashboardBreadCrumb items={breadcrumbItems} />
+      <Heading
+        title="Usuarios"
+        description="Gestionar los usuarios de tu organización (Funcionalidades de la tabla auxiliar de usuarios)."
+      />
+      <Separator />
+      <React.Suspense
+        fallback={
+          <DataTableSkeleton
+            columnCount={7}
+            searchableColumnCount={3}
+            shrinkZero
+          />
+        }
+      >
+        <UsersTable usersPromise={usersPromise} />
+      </React.Suspense>
+    </div>
   );
 }

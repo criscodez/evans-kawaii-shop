@@ -242,6 +242,14 @@ export async function deleteProducts(input: { ids: string[] }) {
       },
     });
 
+    await db.movimientoProducto.deleteMany({
+      where: {
+        productoId: {
+          in: input.ids,
+        },
+      },
+    });
+
     await db.detalleCompra.deleteMany({
       where: {
         productoId: {

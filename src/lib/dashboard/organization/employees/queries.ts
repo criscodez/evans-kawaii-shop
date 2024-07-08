@@ -165,6 +165,14 @@ export async function deleteEmployees(input: { ids: string[] }) {
       },
     });
 
+    await db.user.deleteMany({
+      where: {
+        empleadoId: {
+          in: input.ids,
+        },
+      },
+    });
+
     revalidatePath("/");
 
     return {

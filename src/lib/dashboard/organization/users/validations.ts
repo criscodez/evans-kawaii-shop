@@ -19,14 +19,16 @@ export const createUserSchema = z.object({
     username: z.string().min(3, "El nombre de usuario debe tener al menos 3 caracteres"),
     password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
     empleadoId: z.string().min(1, "El empleado es requerido"),
+    roles: z.array(z.string()).min(1, "Se requiere al menos un rol"),
 });
 
 export type CreateUserSchema = z.infer<typeof createUserSchema>;
 
 export const updateUserSchema = z.object({
     username: z.string().min(3, "El nombre de usuario debe tener al menos 3 caracteres"),
-    password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
+    password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres").optional(),
     empleadoId: z.string().min(1, "El empleado es requerido"),
+    roles: z.array(z.string()).min(1, "Se requiere al menos un rol"),
 });
 
 export type UpdateUserSchema = z.infer<typeof updateUserSchema>;

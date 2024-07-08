@@ -140,9 +140,6 @@ export async function deleteSuppliers(input: { ids: string[] }) {
           in: input.ids,
         },
       },
-      select: {
-        nombre: true,
-      },
     });
 
     revalidatePath("/");

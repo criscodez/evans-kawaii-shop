@@ -10,8 +10,8 @@ import type {
 import { User } from "@/types";
 import { getErrorMessage } from "@/lib/handle-error";
 import { customAlphabet } from "nanoid";
-import { Prisma } from "@prisma/client";
-import bcrypt from "bcrypt"
+import { Prisma, Role } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 export async function getUsers(input: GetUsersSchema) {
   noStore();
@@ -40,6 +40,7 @@ export async function getUsers(input: GetUsersSchema) {
       take: per_page,
       include: {
         empleado: true,
+        roles: true,
       },
       orderBy: {
         [column || "createdAt"]: order || "desc",
@@ -82,6 +83,15 @@ export async function createUser(input: CreateUserSchema) {
       },
     });
 
+    const roles = input.roles.map((role) => ({
+      userId: user.id,
+      role: Role[role as keyof typeof Role],
+    }));
+
+    await db.userRole.createMany({
+      data: roles,
+    });
+
     revalidatePath("/");
 
     return { data: user, error: null };
@@ -113,16 +123,33 @@ export async function updateUser(input: UpdateUserSchema & { id: string }) {
       },
       data: {
         username: input.username,
-        password: input.password,
         empleado: {
           connect: {
             id: input.empleadoId,
           },
         },
+        ...(input.password && {
+          password: await bcrypt.hash(input.password, 10),
+        }),
       },
       include: {
         empleado: true,
       },
+    });
+
+    const roles = input.roles.map((role) => ({
+      userId: user.id,
+      role: Role[role as keyof typeof Role],
+    }));
+
+    await db.userRole.deleteMany({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    await db.userRole.createMany({
+      data: roles,
     });
 
     revalidatePath("/");
@@ -136,6 +163,14 @@ export async function updateUser(input: UpdateUserSchema & { id: string }) {
 export async function deleteUsers(input: { ids: string[] }) {
   noStore();
   try {
+    await db.userRole.deleteMany({
+      where: {
+        userId: {
+          in: input.ids,
+        },
+      },
+    });
+
     await db.user.deleteMany({
       where: {
         id: {

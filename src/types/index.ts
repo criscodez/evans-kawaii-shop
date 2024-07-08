@@ -115,6 +115,14 @@ export interface User {
   username: string;
   image?: string;
   empleado: Empleado;
+  roles: UserRole[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface UserRole {
+  id: string;
+  role: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

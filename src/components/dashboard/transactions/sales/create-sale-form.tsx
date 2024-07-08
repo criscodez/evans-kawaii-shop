@@ -57,6 +57,7 @@ import {
 import { AutoCompleteProductos } from "./products-autocomplete";
 import { getCustomersList } from "@/lib/dashboard/customers/queries";
 import { Checkbox } from "@/components/ui/checkbox";
+import { customAlphabet } from "nanoid";
 
 export interface Items {
   [key: string]: any;
@@ -99,7 +100,7 @@ export default function CreateSaleForm() {
       igv: 0.0,
       comprobante: "TICKET",
       fecha: new Date(),
-      numVenta: "00000001",
+      numVenta: `${customAlphabet("0123456789", 5)()}`,
     },
   });
 
