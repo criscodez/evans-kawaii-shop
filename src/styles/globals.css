@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+/* Opcional: Para navegadores que no son WebKit */
+.scrollbar-hidden {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+
+@layer base {
+  :root {
+    --background: 210 17% 98%;
+    --foreground: 210 5% 38%;
+    --muted: 210 12% 90%;
+    --muted-foreground: 210 12% 30%;
+    --popover: 210 17% 95%;
+    --popover-foreground: 210 5% 28%;
+    --card: 210 17% 96%;
+    --card-foreground: 210 5% 33%;
+    --border: 210 7% 93%;
+    --input: 210 7% 90%;
+    --primary: 35 100% 60%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 35 30% 25%;
+    --secondary-foreground: 35 30% 85%;
+    --accent: 210 17% 83%;
+    --accent-foreground: 210 17% 23%;
+    --destructive: 5 83% 33%;
+    --destructive-foreground: 5 83% 93%;
+    --ring: 35 100% 60%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 210 17% 98%;
+    --foreground: 210 5% 38%;
+    --muted: 210 12% 90%;
+    --muted-foreground: 210 12% 30%;
+    --popover: 210 17% 95%;
+    --popover-foreground: 210 5% 28%;
+    --card: 210 17% 96%;
+    --card-foreground: 210 5% 33%;
+    --border: 210 7% 93%;
+    --input: 210 7% 90%;
+    --primary: 35 100% 60%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 35 30% 25%;
+    --secondary-foreground: 35 30% 85%;
+    --accent: 210 17% 83%;
+    --accent-foreground: 210 17% 23%;
+    --destructive: 5 83% 33%;
+    --destructive-foreground: 5 83% 93%;
+    --ring: 35 100% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

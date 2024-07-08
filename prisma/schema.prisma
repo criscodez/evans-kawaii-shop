@@ -1,0 +1,218 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  GERENTE
+  EMPLEADO_DE_VENTAS
+  EMPLEADO_DE_INVENTARIO
+}
+
+enum EstadoInventario {
+  LIMITADO
+  EN_STOCK
+  AGOTADO
+}
+
+enum TipoMovimiento {
+  ENTRADA
+  SALIDA
+}
+
+enum TipoCliente {
+  PERSONA
+  EMPRESA
+}
+
+enum TipoComprobante {
+  TICKET
+  BOLETA
+  FACTURA
+}
+
+enum Sexo {
+  FEMENINO
+  MASCULINO
+}
+
+model User {
+  id            String     @id @default(cuid())
+  username      String    @unique
+  image         String?
+  password      String
+  empleadoId    String     @unique
+  empleado      Empleado   @relation(fields: [empleadoId], references: [id])
+  roles         UserRole[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserRole {
+  id     Int    @id @default(autoincrement())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+  role   Role
+
+  @@unique([userId, role])
+}
+
+model Empleado {
+  id              String   @id @default(cuid())
+  dni             String   @unique
+  apellidos       String
+  nombres         String
+  fechaNacimiento DateTime
+  sexo            Sexo
+  email           String?
+  telefono        String?
+  direccion       String?
+  ventas          Venta[]
+  ordenes          OrdenCompra[]
+  user            User?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Cliente {
+  id        String      @id @default(cuid())
+  tipo      TipoCliente
+  dni       String?     @unique
+  apellidos String?
+  nombres   String?
+  telefono  String?
+  nombre    String?
+  ruc       String?     @unique
+  email     String?
+  direccion String?
+  ventas    Venta[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Venta {
+  id          String          @id @default(cuid())
+  fecha       DateTime
+  IGV       Float
+  numVenta    String
+  total       Float
+  clienteId   String?
+  empleadoId  String
+  comprobante TipoComprobante
+  cliente     Cliente?        @relation(fields: [clienteId], references: [id])
+  empleado    Empleado        @relation(fields: [empleadoId], references: [id])
+  detalles    DetalleVenta[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DetalleVenta {
+  id         String   @id @default(cuid())
+  cantidad   Int
+  subtotal   Float
+  ventaId    String
+  productoId String
+  venta      Venta    @relation(fields: [ventaId], references: [id])
+  producto   Producto @relation(fields: [productoId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Producto {
+  id            String               @id @default(cuid())
+  nombre        String
+  costo         Float
+  utilidad      Float
+  precio        Float
+  unidadMayor   String
+  unidadMenor   String
+  cantidadMenor Int
+  stockMayor    Int
+  stockMenor    Int
+  stockTotal    Int
+  stockMinimo   Int
+  estado        EstadoInventario     @default(EN_STOCK)
+  categoriaId   String
+  categoria     Categoria            @relation(fields: [categoriaId], references: [id])
+  movimientos   MovimientoProducto[]
+  detalles      DetalleVenta[]
+  detalleCompra DetalleCompra[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Categoria {
+  id        String     @id @default(cuid())
+  nombre    String
+  productos Producto[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MovimientoProducto {
+  id          String         @id @default(cuid())
+  fecha       DateTime
+  descripcion String
+  tipo        TipoMovimiento
+  stockTotal  Int
+  stockMayor  Int
+  stockMenor  Int
+  productoId  String
+  producto    Producto       @relation(fields: [productoId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrdenCompra {
+  id          String    @id @default(cuid())
+  fecha       DateTime
+  IGV       Float
+  total       Float
+  proveedorId String
+  proveedor   Proveedor @relation(fields: [proveedorId], references: [id])
+  empleadoId String
+  empleado Empleado @relation(fields: [empleadoId], references: [id])
+  detalles    DetalleCompra[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DetalleCompra {
+  id         String   @id @default(cuid())
+  cantidad   Int
+  subtotal   Float
+  ordenCompraId    String
+  productoId String
+  ordenCompra     OrdenCompra    @relation(fields: [ordenCompraId], references: [id])
+  producto   Producto @relation(fields: [productoId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Proveedor {
+  id        String        @id @default(cuid())
+  ruc       String        @unique
+  nombre    String
+  direccion String
+  telefono  String
+  email    String
+  ordenes   OrdenCompra[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
