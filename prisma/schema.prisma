@@ -134,11 +134,7 @@ model Producto {
   costo         Float
   utilidad      Float
   precio        Float
-  unidadMayor   String
-  unidadMenor   String
-  cantidadMenor Int
-  stockMayor    Int
-  stockMenor    Int
+  unidad        String
   stockTotal    Int
   stockMinimo   Int
   estado        EstadoInventario     @default(EN_STOCK)
@@ -166,9 +162,8 @@ model MovimientoProducto {
   fecha       DateTime
   descripcion String
   tipo        TipoMovimiento
-  stockTotal  Int
-  stockMayor  Int
-  stockMenor  Int
+  stockAnterior Int
+  stockNuevo Int
   productoId  String
   producto    Producto       @relation(fields: [productoId], references: [id])
 

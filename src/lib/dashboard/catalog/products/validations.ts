@@ -43,14 +43,41 @@ export const createProductSchema = z.object({
       }
     }, "Debe ser una cantidad válida")
     .transform((value) => new Decimal(value).toNumber()),
-  unidadMayor: z.string().min(1, "Elige una unidad"),
-  unidadMenor: z.string().min(1, "Elige una unidad"),
-  stockTotal: z.number().refine((value) => !isNaN(value), {
-    message: "El stock total debe ser un número",
-  }),
-  stockMinimo: z.number().refine((value) => !isNaN(value), {
-    message: "El stock mínimo debe ser un número",
-  }),
+  unidad: z.string().min(1, "Elige una unidad"),
+  stockTotal: z
+    .string()
+    .or(z.number())
+    .refine(
+      (value) => {
+        try {
+          const decimalValue = new Decimal(value);
+          return decimalValue.isInteger();
+        } catch (error) {
+          return false;
+        }
+      },
+      {
+        message: "Debe ser una cantidad válida y no decimal",
+      }
+    )
+    .transform((value) => new Decimal(value).toNumber()),
+  stockMinimo: z
+    .string()
+    .or(z.number())
+    .refine(
+      (value) => {
+        try {
+          const decimalValue = new Decimal(value);
+          return decimalValue.isInteger();
+        } catch (error) {
+          return false;
+        }
+      },
+      {
+        message: "Debe ser una cantidad válida y no decimal",
+      }
+    )
+    .transform((value) => new Decimal(value).toNumber()),
   categoria: z.string().min(1, "Elige una categoría"),
 });
 
@@ -80,14 +107,41 @@ export const updateProductSchema = z.object({
       }
     }, "Debe ser una cantidad válida")
     .transform((value) => new Decimal(value).toNumber()),
-  unidadMayor: z.string().min(1, "Elige una unidad"),
-  unidadMenor: z.string().min(1, "Elige una unidad"),
-  stockTotal: z.number().refine((value) => !isNaN(value), {
-    message: "El stock total debe ser un número",
-  }),
-  stockMinimo: z.number().refine((value) => !isNaN(value), {
-    message: "El stock mínimo debe ser un número",
-  }),
+  unidad: z.string().min(1, "Elige una unidad"),
+  stockTotal: z
+    .string()
+    .or(z.number())
+    .refine(
+      (value) => {
+        try {
+          const decimalValue = new Decimal(value);
+          return decimalValue.isInteger();
+        } catch (error) {
+          return false;
+        }
+      },
+      {
+        message: "Debe ser una cantidad válida y no decimal",
+      }
+    )
+    .transform((value) => new Decimal(value).toNumber()),
+  stockMinimo: z
+    .string()
+    .or(z.number())
+    .refine(
+      (value) => {
+        try {
+          const decimalValue = new Decimal(value);
+          return decimalValue.isInteger();
+        } catch (error) {
+          return false;
+        }
+      },
+      {
+        message: "Debe ser una cantidad válida y no decimal",
+      }
+    )
+    .transform((value) => new Decimal(value).toNumber()),
   categoria: z.string().min(1, "Elige una categoría"),
 });
 

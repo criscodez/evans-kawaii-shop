@@ -6,7 +6,7 @@ import type { CreateSaleSchema, GetSalesSchema } from "./validations";
 import { Venta } from "@/types";
 import { getErrorMessage } from "@/lib/handle-error";
 import { customAlphabet } from "nanoid";
-import { Prisma, TipoComprobante } from "@prisma/client";
+import { EstadoInventario, Prisma, Producto, TipoComprobante } from "@prisma/client";
 
 export async function getSales(input: GetSalesSchema, empleadoId?: string) {
   noStore();
@@ -59,6 +59,34 @@ export async function getSales(input: GetSalesSchema, empleadoId?: string) {
   }
 }
 
+export async function checkProductsStock(productos: { productoId: string; cantidad: number, subtotal: number }[]) {
+  noStore();
+  const productosDB = await db.producto.findMany({
+    where: {
+      id: {
+        in: productos.map((producto) => producto.productoId),
+      },
+    },
+  });
+
+  const productosSinStock = productosDB.filter((productoDB) => {
+    const producto = productos.find(
+      (producto) => producto.productoId === productoDB.id
+    );
+
+    if (!producto) {
+      return false;
+    }
+
+    return productoDB.stockTotal < producto.cantidad;
+  })
+
+  return {
+    productosSinStock,
+    error: null,
+  };
+}
+
 export async function createSale(input: CreateSaleSchema) {
   try {
     const venta = await db.venta.create({
@@ -88,6 +116,43 @@ export async function createSale(input: CreateSaleSchema) {
       data: productos,
     });
 
+    productos.forEach(async (producto) => {
+      const productoDB = await db.producto.findUnique({
+        where: {
+          id: producto.productoId,
+        },
+      });
+
+      if (!productoDB) {
+        return;
+      }
+
+      const stock = productoDB.stockTotal - producto.cantidad;
+
+      await db.producto.update({
+        where: {
+          id: producto.productoId,
+        },
+        data: {
+          stockTotal: {
+            decrement: producto.cantidad,
+          },
+          estado: stock === productoDB.stockMinimo ? EstadoInventario.LIMITADO : stock > 0 ? EstadoInventario.EN_STOCK : EstadoInventario.AGOTADO,
+        },
+      });
+
+      await db.movimientoProducto.create({
+        data: {
+          fecha: new Date(),
+          tipo: "SALIDA",
+          descripcion: `Venta de x${producto.cantidad} ${productoDB.nombre} hecha por el empleado ${venta.empleadoId}`,
+          stockAnterior: productoDB.stockTotal,
+          stockNuevo: productoDB.stockTotal - producto.cantidad,
+          productoId: producto.productoId,
+        },
+      });
+    });
+
     return {
       data: venta,
       error: null,
@@ -103,6 +168,14 @@ export async function createSale(input: CreateSaleSchema) {
 export async function deleteSales(input: { ids: string[] }) {
   noStore();
   try {
+    await db.detalleVenta.deleteMany({
+      where: {
+        ventaId: {
+          in: input.ids,
+        },
+      },
+    });
+
     await db.venta.deleteMany({
       where: {
         id: {
@@ -118,14 +191,6 @@ export async function deleteSales(input: { ids: string[] }) {
       error: null,
     };
   } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError) {
-      if (err.code === "P2003") {
-        return {
-          data: null,
-          error: "No se puede eliminar este cliente.",
-        };
-      }
-    }
     return {
       data: null,
       error: getErrorMessage(err),

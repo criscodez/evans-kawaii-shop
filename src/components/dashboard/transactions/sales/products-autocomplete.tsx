@@ -63,6 +63,7 @@ import {
                 productoId: procutoToAdd.id,
                 cantidad: 1,
                 precio: procutoToAdd.precio,
+                stockTotal: procutoToAdd.stockTotal,
                 subtotal: procutoToAdd.precio,
               },
             ]);
@@ -88,6 +89,7 @@ import {
         {
           nombre: producto.nombre,
           productoId: producto.id,
+          stockTotal: producto.stockTotal,
           cantidad: 1,
           subtotal: producto.precio,
           precio: producto.precio,
@@ -134,6 +136,7 @@ import {
                       <CommandItem
                         key={producto.id}
                         value={producto.id}
+                        disabled={producto.stockTotal === 0}
                         onMouseDown={(event) => {
                           event.preventDefault();
                           event.stopPropagation();

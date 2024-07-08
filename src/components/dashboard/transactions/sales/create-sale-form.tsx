@@ -42,7 +42,10 @@ import {
 } from "@/components/ui/form";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { useSession } from "next-auth/react";
-import { createSale } from "@/lib/dashboard/transactions/sales/queries";
+import {
+  checkProductsStock,
+  createSale,
+} from "@/lib/dashboard/transactions/sales/queries";
 import {
   Table,
   TableBody,
@@ -61,6 +64,7 @@ export interface Items {
   precio: number;
   productoId: string;
   cantidad: number;
+  stockTotal: number;
   subtotal: number;
 }
 
@@ -110,7 +114,7 @@ export default function CreateSaleForm() {
       return false;
     });
     setFilteredClientes(filtered);
-    form.setValue("clienteId", "")
+    form.setValue("clienteId", "");
   }, [tipoComprobante, clientes]);
 
   React.useEffect(() => {
@@ -150,8 +154,17 @@ export default function CreateSaleForm() {
   }, [subTotal, igv]);
 
   function onSubmit(input: CreateSaleSchema) {
-    console.log(input);
     startCreateTransition(async () => {
+      const { productosSinStock } = await checkProductsStock(input.productos);
+
+      if (productosSinStock.length > 0) {
+        toast.error(
+          "Los siguientes productos no tienen stock suficiente: " +
+            productosSinStock.map((item) => item.nombre + "(" + item.stockTotal + ")").join(", ")
+        );
+        return;
+      }
+
       const { error, data } = await createSale(input);
 
       if (error) {
@@ -353,6 +366,7 @@ export default function CreateSaleForm() {
                                     }
                                     value={item.cantidad}
                                     min={1}
+                                    max={item.stockTotal}
                                     type="number"
                                   />
                                 </TableCell>

@@ -130,7 +130,6 @@ export default function CreatePurchaseForm() {
   }, [subTotal, igv]);
 
   function onSubmit(input: CreatePurchaseSchema) {
-    console.log(input);
     startCreateTransition(async () => {
       const { error, data } = await createPurchase(input);
 

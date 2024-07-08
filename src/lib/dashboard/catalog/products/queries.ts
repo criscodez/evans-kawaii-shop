@@ -6,6 +6,7 @@ import type { CreateProductSchema, GetProductsSchema, UpdateProductSchema } from
 import { Producto } from "@/types";
 import { getErrorMessage } from "@/lib/handle-error";
 import { customAlphabet } from "nanoid"
+import { EstadoInventario } from "@prisma/client";
 
 export async function getProducts(input: GetProductsSchema) {
   noStore();
@@ -61,11 +62,7 @@ export async function getProducts(input: GetProductsSchema) {
         costo: item.costo,
         utilidad: item.utilidad,
         precio: item.precio,
-        unidadMayor: item.unidadMayor,
-        unidadMenor: item.unidadMenor,
-        cantidadMenor: item.cantidadMenor,
-        stockMayor: item.stockMayor,
-        stockMenor: item.stockMenor,
+        unidad: item.unidad,
         stockTotal: item.stockTotal,
         stockMinimo: item.stockMinimo,
         estado: item.estado,
@@ -128,10 +125,10 @@ export async function updateProduct(input: UpdateProductSchema & { id: string })
         costo: input.costo,
         utilidad: input.utilidad,
         precio: input.costo + input.utilidad,
-        unidadMayor: input.unidadMayor,
-        unidadMenor: input.unidadMenor,
+        unidad: input.unidad,
         stockTotal: input.stockTotal,
         stockMinimo: input.stockMinimo,
+        estado: input.stockTotal === input.stockMinimo ? EstadoInventario.LIMITADO : input.stockTotal > 0 ? EstadoInventario.EN_STOCK : EstadoInventario.AGOTADO,
         categoria: {
           connect: {
             id: input.categoria,
@@ -164,11 +161,7 @@ export async function createProduct(input: CreateProductSchema) {
         costo: input.costo,
         utilidad: input.utilidad,
         precio: input.costo + input.utilidad,
-        unidadMayor: input.unidadMayor,
-        unidadMenor: input.unidadMenor,
-        cantidadMenor: 0,
-        stockMayor: 0,
-        stockMenor: 0,
+        unidad: input.unidad,
         stockTotal: input.stockTotal,
         stockMinimo: input.stockMinimo,
         categoria: {
@@ -241,6 +234,22 @@ export async function deleteProduct(input: { id: string }) {
 export async function deleteProducts(input: { ids: string[] }) {
   noStore();
   try {
+    await db.detalleVenta.deleteMany({
+      where: {
+        productoId: {
+          in: input.ids,
+        },
+      },
+    });
+
+    await db.detalleCompra.deleteMany({
+      where: {
+        productoId: {
+          in: input.ids,
+        },
+      },
+    });
+
     await db.producto.deleteMany({
       where: {
         id: {

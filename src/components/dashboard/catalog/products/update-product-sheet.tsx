@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -69,8 +70,7 @@ export function UpdateProductSheet({
       costo: producto.costo,
       utilidad: producto.utilidad,
       stockTotal: producto.stockTotal,
-      unidadMayor: producto.unidadMayor,
-      unidadMenor: producto.unidadMenor,
+      unidad: producto.unidad,
       stockMinimo: producto.stockMinimo,
       categoria: producto.categoria.id,
     },
@@ -151,6 +151,7 @@ export function UpdateProductSheet({
                         placeholder="Stock del producto"
                         type="number"
                         className="w-full"
+                        min={0}
                         {...field}
                       />
                     </FormControl>
@@ -169,6 +170,7 @@ export function UpdateProductSheet({
                         placeholder="Stock mínimo del producto"
                         type="number"
                         className="w-full"
+                        min={0}
                         {...field}
                       />
                     </FormControl>
@@ -177,42 +179,27 @@ export function UpdateProductSheet({
                 )}
               />
             </div>
-            <div className="grid grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="unidadMayor"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Unidad Mayor</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Unidad mayor del producto"
-                        className="w-full"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="unidadMenor"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Unidad Menor</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Unidad menor del producto"
-                        className="w-full"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="unidad"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Unidad</FormLabel>
+                  <FormDescription>
+                    Unidad del producto (ej: unit., kg., g., box., dozen., m.,
+                    cm.)
+                  </FormDescription>
+                  <FormControl>
+                    <Input
+                      placeholder="ej: unit., kg., etc"
+                      className="w-full"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <div className="grid grid-cols-2 gap-6">
               <FormField
                 control={form.control}

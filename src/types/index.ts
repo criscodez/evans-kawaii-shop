@@ -54,11 +54,7 @@ export interface Producto {
   precio: number;
   utilidad: number;
   costo: number;
-  unidadMayor: string;
-  unidadMenor: string;
-  cantidadMenor: number;
-  stockMayor: number;
-  stockMenor: number;
+  unidad: string;
   stockTotal: number;
   stockMinimo: number;
   estado: string;
@@ -143,6 +139,18 @@ export interface Venta {
   total: number;
   IGV: number;
   comprobante: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface MovimientoProducto {
+  id: string;
+  fecha: Date;
+  descripcion: string;
+  tipo: string;
+  stockAnterior: number;
+  stockNuevo: number;
+  producto: Producto;
   createdAt?: Date;
   updatedAt?: Date;
 }

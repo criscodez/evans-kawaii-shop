@@ -101,6 +101,41 @@ export async function createPurchase(input: CreatePurchaseSchema) {
       data: productos,
     });
 
+    productos.forEach(async (producto) => {
+      const productoDB = await db.producto.findUnique({
+        where: {
+          id: producto.productoId,
+        },
+      });
+
+      if (!productoDB) {
+        return;
+      }
+
+      await db.producto.update({
+        where: {
+          id: producto.productoId,
+        },
+        data: {
+          stockTotal: {
+            increment: producto.cantidad,
+          }
+        },
+      });
+
+      await db.movimientoProducto.create({
+        data: {
+          fecha: new Date(),
+          descripcion:
+            "Compra de productos por orden de compra, Empleado: " + ordenCompra.empleadoId +", Proveedor: " + ordenCompra.proveedorId,
+          tipo: "ENTRADA",
+          stockAnterior: productoDB.stockTotal,
+          stockNuevo: productoDB.stockTotal + producto.cantidad,
+          productoId: producto.productoId,
+        },
+      });
+    });
+
     return {
       data: ordenCompra,
       error: null,

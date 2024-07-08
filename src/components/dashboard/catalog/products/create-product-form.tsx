@@ -38,6 +38,7 @@ import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -58,8 +59,7 @@ export default function CreateProductForm() {
       nombre: "",
       costo: 0.0,
       utilidad: 0.0,
-      unidadMayor: "",
-      unidadMenor: "",
+      unidad: "Unit.",
       stockTotal: 0,
       stockMinimo: 0,
       categoria: "",
@@ -176,6 +176,7 @@ export default function CreateProductForm() {
                                   placeholder="Stock del producto"
                                   type="number"
                                   className="w-full"
+                                  min={0}
                                   {...field}
                                 />
                               </FormControl>
@@ -196,6 +197,7 @@ export default function CreateProductForm() {
                                   placeholder="Stock mínimo del producto"
                                   type="number"
                                   className="w-full"
+                                  min={0}
                                   {...field}
                                 />
                               </FormControl>
@@ -205,46 +207,27 @@ export default function CreateProductForm() {
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <FormField
-                          control={form.control}
-                          name="unidadMayor"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Unidad Mayor</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="Unidad mayor del producto"
-                                  className="w-full"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div>
-                        <FormField
-                          control={form.control}
-                          name="unidadMenor"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Unidad Menor</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="Unidad menor del producto"
-                                  className="w-full"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
+                    <FormField
+                      control={form.control}
+                      name="unidad"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Unidad</FormLabel>
+                          <FormDescription>
+                            Unidad del producto (ej: unit., kg., g., box., dozen., m.,
+                            cm.)
+                          </FormDescription>
+                          <FormControl>
+                            <Input
+                              placeholder="ej: unit., kg., etc"
+                              className="w-full"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </CardContent>
               </Card>
